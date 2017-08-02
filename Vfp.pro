@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,18 +27,31 @@ QMAKE_CXXFLAGS = -std=c++11
 SOURCES += main.cpp\
         View/mainview.cpp \
     View/setuptab.cpp \
-    Model/setting.cpp \
+    Model/settings.cpp \
     startup.cpp \
-    utils.cpp
+    utils.cpp \
+    Model/provider.cpp \
+    Model/instsocket.cpp \
+    Model/instrument.cpp \
+    ViewMgr/setupviewmanager.cpp \
+    View/controltab.cpp \
+    ViewMgr/controltabviewmanager.cpp
 
 HEADERS  += View/mainview.h \
     View/setuptab.h \
-    Model/setting.h \
     startup.h \
-    utils.h
+    utils.h \
+    Model/provider.h \
+    Model/settings.h \
+    Model/instsocket.h \
+    Model/instrument.h \
+    ViewMgr/setupviewmanager.h \
+    View/controltab.h \
+    ViewMgr/controltabviewmanager.h
 
 FORMS    += View/mainview.ui \
-    View/setuptab.ui
+    View/setuptab.ui \
+    View/controltab.ui
 
 RESOURCES += \
     vfpresources.qrc

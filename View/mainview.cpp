@@ -4,13 +4,15 @@
 
 namespace Ps{
 
-MainView::MainView(QWidget *parent, SetupTab* p_setupTab) :
+MainView::MainView(QWidget *parent, SetupTab* p_setupTab, ControlTab *p_controlTab) :
     QMainWindow(parent),
     ui(new Ui::MainView)
 {
     ui->setupUi(this);
-    //auto setup_tab = new SetupTab(this);
+    p_setupTab->setParent(this);
+    p_controlTab->setParent(this);
     ui->loSetupTab->addWidget(p_setupTab);
+    ui->loControlTab->addWidget(p_controlTab);
 }
 
 MainView::~MainView()

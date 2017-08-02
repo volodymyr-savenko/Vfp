@@ -1,6 +1,7 @@
 #ifndef MAINVIEW_H
 #define MAINVIEW_H
 #include "setuptab.h"
+#include "controltab.h"
 #include <QMainWindow>
 
 
@@ -14,7 +15,7 @@ namespace Ps {
         Q_OBJECT
 
     public:
-        MainView(QWidget* parent, SetupTab* p_setupTab);
+        MainView(QWidget* parent, SetupTab* p_setupTab, ControlTab* p_controlTab);
         ~MainView();
 
     private:

@@ -1,8 +1,5 @@
-#include "setting.h"
+#include "settings.h"
 #include <QDebug>
-#include <QString>
-#include <QDir>
-#include <QFile>
 #include <QString>
 #include <QDir>
 #include <QFile>
@@ -16,8 +13,9 @@
 namespace Ps
 {
 
+    static const int PW_CMD_INDEX = 5;
     static auto RESOURSE_PREFIX = QStringLiteral(":/json");
-    Setting::Setting(QObject *parent, QString filename) :
+    Settings::Settings(QObject *parent, QString filename) :
         QObject(parent),
         m_filename(filename),
         m_modelCommands(*new QStringListModel())
@@ -26,55 +24,85 @@ namespace Ps
     }
 
 
-    void Setting::ParseJsonData(){
+    void Settings::ParseJsonData(){
         QString raw_json = ReadJsonFile();
-        if (raw_json.isEmpty())
-            return;
+        if (raw_json.isEmpty()) return;
+
         auto json_result = GetJsonObject(raw_json);
         auto json_err = json_result.second;
         if (json_err.error != QJsonParseError::NoError){
             //ShowJsonParseError();
         }
         auto json_obj = json_result.first;
+
         m_applicationName = json_obj["applicationName"].toString();
         m_appShortName = json_obj["appShortName"].toString();
         m_hostName = json_obj["hostName"].toString();
-        m_waitMs = json_obj["tcpLongWaitMs"].toInt();
         m_portNumber = json_obj["port"].toInt();
+        m_waitMs = json_obj["tcpLongWaitMs"].toInt();
         m_readWaitMs = json_obj["tcpShortWaitMs"].toInt();
-        qDebug() << m_applicationName;
-        qDebug() << m_appShortName;
-        qDebug() << m_hostName;
-        qDebug() << m_waitMs;
-        qDebug() <<  m_portNumber;
-        qDebug() << m_readWaitMs;
         SetupCommands(json_obj);
-//        for (auto item: m_modelCommands){
-//            qDebug() << item.toString();
-//        }
-
     }
 
-    JsonObjErrPair Setting::GetJsonObject(const QString& str){
+    QString Settings::getHostName()
+    {
+        return m_hostName;
+    }
+
+    quint16 Settings::getPortNumber()
+    {
+        return m_portNumber;
+    }
+
+    QStringListModel& Settings::getCommandsAsModel()
+    {
+        return m_modelCommands;
+    }
+
+    uint Settings::getLongWaitMs()
+    {
+        return m_waitMs;
+    }
+
+    uint Settings::getShortWaitMs()
+    {
+        return m_readWaitMs;
+    }
+
+    JsonObjErrPair Settings::GetJsonObject(const QString& str){
         QJsonParseError json_parse_err;
         QJsonDocument json_doc = QJsonDocument::fromJson(str.toUtf8(), &json_parse_err);
         QJsonObject json_obj = json_doc.object();
         return std::make_pair(json_obj, json_parse_err);
     }
-    void Setting::SetupCommands(QJsonObject json_obj){
+    void Settings::SetupCommands(QJsonObject json_obj){
         QJsonArray cmd_array = json_obj["commands"].toArray();
         QStringList cmd_list;
+        qDebug() << cmd_list;
         for (auto item: cmd_array) {
             cmd_list.append(item.toString());
         }
         m_modelCommands.setStringList(cmd_list);
+
+        auto index = m_modelCommands.index(PW_CMD_INDEX);
+        auto test_cmd = m_modelCommands.data(index, Qt::DisplayRole);
+        qDebug() << "Test Command the hard way " << test_cmd.toString();
+
+        if (PW_CMD_INDEX < cmd_list.size()){
+            m_pwCommand = cmd_list.at(PW_CMD_INDEX);
+
+        }
+        else{
+            emit NotifyStatusMessage("Unable to get pulse width command");
+        }
+
     }
-    QString Setting::ReadJsonFile()
+    QString Settings::ReadJsonFile()
     {
-        auto default_setting = ReadJsonFromInternalResource();
-        return default_setting;
+        auto default_settings = ReadJsonFromInternalResource();
+        return default_settings;
     }
-    QString Setting::ReadJsonFromInternalResource()
+    QString Settings::ReadJsonFromInternalResource()
     {
         QDir res_dir (RESOURSE_PREFIX);
         if (!res_dir.exists())
@@ -89,15 +117,10 @@ namespace Ps
             SendErrorMessage("Could not open internal resource " + path);
         }
         QString settings = res_file.readAll();
-        QStringList ls = settings.split(",",QString::SkipEmptyParts);
-//        foreach(QString str, ls)
-//        {
-//            qDebug() << str ;
-//        }
         return settings;
     }
 
-    void Setting::SendErrorMessage(const QString &msg)
+    void Settings::SendErrorMessage(const QString &msg)
     {
         emit NotifyStatusMessage(msg);
     }

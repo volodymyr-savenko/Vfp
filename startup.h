@@ -1,9 +1,14 @@
 #pragma once
 #include <QObject>
-#include "View/setuptab.h"
-#include "View/mainview.h"
 
 namespace Ps{
+
+    class Instrument;
+    class SetupTab;
+    class ControlTab;
+    class MainView;
+    class SetupViewManager;
+    class ControlTabViewManager;
 
     class Startup final: public QObject
     {
@@ -13,9 +18,12 @@ namespace Ps{
         ~Startup();
         void show() const;
     private:
-        //SetupTab& m_setuptab;
-        SetupTab* pm_setupTab;
+        SetupTab* m_setupTab;
+        ControlTab* m_controlTab;
         MainView* m_mainView;
+        Instrument* m_instrument;
+        SetupViewManager* m_setupVM;
+        ControlTabViewManager* m_controlTabVM;
     };
 }
 
